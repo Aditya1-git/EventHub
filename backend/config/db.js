@@ -13,11 +13,11 @@ const connectDB = async () => {
     isConnected = conn.connections[0].readyState === 1;
     console.log(`MongoDB connected: ${conn.connection.host}`);
 
-    // If database has no events yet, run the seed script once
+    // Populate initial sample events only if database is completely empty (0 events)
     const Event = require('../models/Event');
     const count = await Event.countDocuments();
-    if (count === 0 || process.env.AUTO_SEED === 'true') {
-      console.log('Seeding initial events into database...');
+    if (count === 0) {
+      console.log('Database has no events, seeding initial sample data...');
       const seedData = require('../seed');
       await seedData(false);
     }

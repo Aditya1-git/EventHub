@@ -16,51 +16,64 @@ const seedData = async (isCli = false) => {
     }
     console.log('Seeding database...');
 
-    await User.deleteMany();
-    await Event.deleteMany();
-    await Registration.deleteMany();
+    if (isCli) {
+      // Only do a destructive wipe if developer explicitly runs `node backend/seed.js` via CLI
+      await User.deleteMany();
+      await Event.deleteMany();
+      await Registration.deleteMany();
+    }
 
     const adminPassword = await bcrypt.hash('Admin@123', 10);
     const userPassword = await bcrypt.hash('User@123', 10);
 
-    const users = await User.insertMany([
-      {
+    // Ensure demo admin and users exist without touching or deleting real registered users
+    let adminUser = await User.findOne({ email: 'admin@eventhub.com' });
+    if (!adminUser) {
+      adminUser = await User.create({
         name: 'Admin User',
         email: 'admin@eventhub.com',
         phone: '+1 555-0199',
         password: adminPassword,
         role: 'admin',
         createdAt: new Date('2026-01-10')
-      },
-      {
+      });
+    }
+
+    let demoUser = await User.findOne({ email: 'user@eventhub.com' });
+    if (!demoUser) {
+      demoUser = await User.create({
         name: 'Alex Johnson',
         email: 'user@eventhub.com',
         phone: '+1 555-0144',
         password: userPassword,
         role: 'user',
         createdAt: new Date('2026-02-01')
-      },
-      {
+      });
+    }
+
+    let userSarah = await User.findOne({ email: 'sarah.w@example.com' });
+    if (!userSarah) {
+      userSarah = await User.create({
         name: 'Sarah Williams',
         email: 'sarah.w@example.com',
         phone: '+1 555-0177',
         password: userPassword,
         role: 'user',
         createdAt: new Date('2026-02-15')
-      },
-      {
+      });
+    }
+
+    let userMichael = await User.findOne({ email: 'mchen@example.com' });
+    if (!userMichael) {
+      userMichael = await User.create({
         name: 'Michael Chen',
         email: 'mchen@example.com',
         phone: '+1 555-0288',
         password: userPassword,
         role: 'user',
         createdAt: new Date('2026-03-01')
-      }
-    ]);
-
-    const demoUser = users[1];
-    const userSarah = users[2];
-    const userMichael = users[3];
+      });
+    }
 
     const now = new Date();
     const addDays = (d) => new Date(now.getTime() + d * 24 * 60 * 60 * 1000);
@@ -248,84 +261,97 @@ const seedData = async (isCli = false) => {
       }
     ];
 
-    const createdEvents = await Event.insertMany(eventsData);
+    const existingEventsCount = await Event.countDocuments();
+    let createdEvents = [];
 
-    const registrationsData = [
-      {
-        user: demoUser._id,
-        event: createdEvents[0]._id,
-        participantName: demoUser.name,
-        email: demoUser.email,
-        phone: demoUser.phone,
-        registrationStatus: 'confirmed',
-        registeredAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
-      },
-      {
-        user: demoUser._id,
-        event: createdEvents[1]._id,
-        participantName: demoUser.name,
-        email: demoUser.email,
-        phone: demoUser.phone,
-        registrationStatus: 'confirmed',
-        registeredAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-      },
-      {
-        user: userSarah._id,
-        event: createdEvents[0]._id,
-        participantName: userSarah.name,
-        email: userSarah.email,
-        phone: userSarah.phone,
-        registrationStatus: 'confirmed',
-        registeredAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
-      },
-      {
-        user: userSarah._id,
-        event: createdEvents[2]._id,
-        participantName: userSarah.name,
-        email: userSarah.email,
-        phone: userSarah.phone,
-        registrationStatus: 'confirmed',
-        registeredAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
-      },
-      {
-        user: userMichael._id,
-        event: createdEvents[0]._id,
-        participantName: userMichael.name,
-        email: userMichael.email,
-        phone: userMichael.phone,
-        registrationStatus: 'confirmed',
-        registeredAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
-      },
-      {
-        user: userMichael._id,
-        event: createdEvents[3]._id,
-        participantName: userMichael.name,
-        email: userMichael.email,
-        phone: userMichael.phone,
-        registrationStatus: 'confirmed',
-        registeredAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-      },
-      {
-        user: userMichael._id,
-        event: createdEvents[4]._id,
-        participantName: userMichael.name,
-        email: userMichael.email,
-        phone: userMichael.phone,
-        registrationStatus: 'confirmed',
-        registeredAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
-      },
-      {
-        user: demoUser._id,
-        event: createdEvents[6]._id,
-        participantName: demoUser.name,
-        email: demoUser.email,
-        phone: demoUser.phone,
-        registrationStatus: 'cancelled',
-        registeredAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      }
-    ];
+    if (existingEventsCount === 0 || isCli) {
+      createdEvents = await Event.insertMany(eventsData);
+    } else {
+      createdEvents = await Event.find().sort({ createdAt: 1 }).limit(10);
+    }
 
-    await Registration.insertMany(registrationsData);
+    const existingRegCount = await Registration.countDocuments();
+    let insertedRegsCount = 0;
+
+    if ((existingRegCount === 0 || isCli) && createdEvents.length >= 7) {
+      const registrationsData = [
+        {
+          user: demoUser._id,
+          event: createdEvents[0]._id,
+          participantName: demoUser.name,
+          email: demoUser.email,
+          phone: demoUser.phone,
+          registrationStatus: 'confirmed',
+          registeredAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
+        },
+        {
+          user: demoUser._id,
+          event: createdEvents[1]._id,
+          participantName: demoUser.name,
+          email: demoUser.email,
+          phone: demoUser.phone,
+          registrationStatus: 'confirmed',
+          registeredAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+        },
+        {
+          user: userSarah._id,
+          event: createdEvents[0]._id,
+          participantName: userSarah.name,
+          email: userSarah.email,
+          phone: userSarah.phone,
+          registrationStatus: 'confirmed',
+          registeredAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000)
+        },
+        {
+          user: userSarah._id,
+          event: createdEvents[2]._id,
+          participantName: userSarah.name,
+          email: userSarah.email,
+          phone: userSarah.phone,
+          registrationStatus: 'confirmed',
+          registeredAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+        },
+        {
+          user: userMichael._id,
+          event: createdEvents[0]._id,
+          participantName: userMichael.name,
+          email: userMichael.email,
+          phone: userMichael.phone,
+          registrationStatus: 'confirmed',
+          registeredAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000)
+        },
+        {
+          user: userMichael._id,
+          event: createdEvents[3]._id,
+          participantName: userMichael.name,
+          email: userMichael.email,
+          phone: userMichael.phone,
+          registrationStatus: 'confirmed',
+          registeredAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
+        },
+        {
+          user: userMichael._id,
+          event: createdEvents[4]._id,
+          participantName: userMichael.name,
+          email: userMichael.email,
+          phone: userMichael.phone,
+          registrationStatus: 'confirmed',
+          registeredAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
+        },
+        {
+          user: demoUser._id,
+          event: createdEvents[6]._id,
+          participantName: demoUser.name,
+          email: demoUser.email,
+          phone: demoUser.phone,
+          registrationStatus: 'cancelled',
+          registeredAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        }
+      ];
+
+      const res = await Registration.insertMany(registrationsData);
+      insertedRegsCount = res.length;
+    }
 
     console.log('Seeding finished successfully.');
     if (isCli) {
@@ -334,8 +360,7 @@ const seedData = async (isCli = false) => {
     return {
       success: true,
       eventsCount: createdEvents.length,
-      usersCount: users.length,
-      registrationsCount: registrationsData.length
+      registrationsCount: insertedRegsCount
     };
   } catch (error) {
     console.error('Seeding error:', error.message);
