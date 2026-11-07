@@ -116,11 +116,11 @@ const ManageRegistrations = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
             Manage Registrations
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-            Monitor participant passes, attendance records, and download reports.
+            View all attendee registrations and export as CSV.
           </p>
         </div>
 
@@ -200,7 +200,7 @@ const ManageRegistrations = () => {
       <div className="rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-sm">
         {loading ? (
           <div className="py-20 flex justify-center">
-            <LoadingSpinner size="md" text="Loading registrations list..." />
+            <LoadingSpinner size="md" text="Loading registrations..." />
           </div>
         ) : registrations.length > 0 ? (
           <div className="overflow-x-auto">

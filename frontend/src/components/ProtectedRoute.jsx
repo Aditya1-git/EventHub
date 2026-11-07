@@ -10,7 +10,7 @@ export const ProtectedRoute = ({ children }) => {
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Authenticating session..." />
+        <LoadingSpinner size="lg" text="" />
       </div>
     );
   }

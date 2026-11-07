@@ -126,7 +126,7 @@ const AddEvent = () => {
           Add New Event
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-          Fill in the details to publish an event to the EventHub discovery portal.
+          Fill in the event details below.
         </p>
       </div>
 
@@ -150,7 +150,7 @@ const AddEvent = () => {
             name="title"
             value={formData.title}
             onChange={handleChange}
-            placeholder="e.g. NextGen AI Developer Conference 2026"
+            placeholder="e.g. Campus Web Development Workshop"
             required
             className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />

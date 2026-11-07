@@ -10,8 +10,8 @@ export const AdminRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <LoadingSpinner size="lg" text="Verifying admin credentials..." />
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
+        <LoadingSpinner size="lg" text="" />
       </div>
     );
   }
@@ -21,7 +21,7 @@ export const AdminRoute = ({ children }) => {
   }
 
   if (user?.role !== 'admin') {
-    toast.error('Access denied: Administrator privileges required');
+    toast.error('Admin access required');
     return <Navigate to="/" replace />;
   }
 

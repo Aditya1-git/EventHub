@@ -1,9 +1,6 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
-// @desc    Register a new user
-// @route   POST /api/auth/register
-// @access  Public
 const registerUser = async (req, res, next) => {
   try {
     const { name, email, phone, password, confirmPassword } = req.body;
@@ -11,7 +8,7 @@ const registerUser = async (req, res, next) => {
     if (!name || !email || !phone || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields'
+        message: 'Please fill in all required fields'
       });
     }
 
@@ -29,11 +26,11 @@ const registerUser = async (req, res, next) => {
       });
     }
 
-    const userExists = await User.findOne({ email: email.toLowerCase() });
-    if (userExists) {
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'A user with this email already exists'
+        message: 'An account with this email already exists'
       });
     }
 
@@ -49,7 +46,7 @@ const registerUser = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful',
+      message: 'Account created successfully',
       token,
       user: {
         _id: user._id,
@@ -65,9 +62,6 @@ const registerUser = async (req, res, next) => {
   }
 };
 
-// @desc    Authenticate user & get token
-// @route   POST /api/auth/login
-// @access  Public
 const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -75,7 +69,7 @@ const loginUser = async (req, res, next) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email and password'
+        message: 'Email and password are required'
       });
     }
 
@@ -90,9 +84,9 @@ const loginUser = async (req, res, next) => {
 
     const token = generateToken(res, user._id);
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: 'Logged in successfully',
+      message: 'Welcome back!',
       token,
       user: {
         _id: user._id,
@@ -108,13 +102,10 @@ const loginUser = async (req, res, next) => {
   }
 };
 
-// @desc    Get current user profile
-// @route   GET /api/auth/me
-// @access  Private
 const getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
-    res.status(200).json({
+    res.json({
       success: true,
       user
     });
@@ -123,21 +114,15 @@ const getMe = async (req, res, next) => {
   }
 };
 
-// @desc    Logout user & clear cookie
-// @route   POST /api/auth/logout
-// @access  Public
 const logoutUser = (req, res) => {
-  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('token', '', {
     httpOnly: true,
-    expires: new Date(0),
-    secure: isProduction,
-    sameSite: isProduction ? 'strict' : 'lax'
+    expires: new Date(0)
   });
 
-  res.status(200).json({
+  res.json({
     success: true,
-    message: 'Logged out successfully'
+    message: 'Logged out'
   });
 };
 

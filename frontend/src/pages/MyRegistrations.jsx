@@ -107,7 +107,7 @@ const MyRegistrations = () => {
             My Registrations
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            View all your booked event passes, confirmed seats, and attendance history.
+            View and manage your registered events.
           </p>
         </div>
 
@@ -148,7 +148,7 @@ const MyRegistrations = () => {
       {/* Content */}
       {loading ? (
         <div className="py-20 flex justify-center">
-          <LoadingSpinner size="lg" text="Loading your event passes..." />
+          <LoadingSpinner size="lg" text="Loading registrations..." />
         </div>
       ) : filteredRegistrations.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -210,7 +210,7 @@ const MyRegistrations = () => {
                     ) : (
                       <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-emerald-600 text-white shadow-sm flex items-center space-x-1">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Confirmed Pass</span>
+                        <span>Registered</span>
                       </span>
                     )}
                   </div>
@@ -238,8 +238,8 @@ const MyRegistrations = () => {
                   {/* Registration Metadata & Action Buttons */}
                   <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3">
                     <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                      <span>Pass for: <strong>{reg.participantName}</strong></span>
-                      <span>Booked: {formattedRegDate}</span>
+                      <span>Name: <strong>{reg.participantName}</strong></span>
+                      <span>Registered: {formattedRegDate}</span>
                     </div>
 
                     <div className="flex items-center space-x-2">
@@ -248,7 +248,7 @@ const MyRegistrations = () => {
                         className="flex-1 py-2 px-3 text-center rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition-colors flex items-center justify-center space-x-1"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
-                        <span>Event Page</span>
+                        <span>Event Details</span>
                       </Link>
 
                       {canCancel && (
@@ -257,7 +257,7 @@ const MyRegistrations = () => {
                           onClick={() => handleOpenCancelModal(reg)}
                           className="py-2 px-3 rounded-xl border border-rose-200 dark:border-rose-900 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-colors cursor-pointer"
                         >
-                          Cancel Pass
+                          Cancel
                         </button>
                       )}
                     </div>
@@ -279,8 +279,8 @@ const MyRegistrations = () => {
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
               {activeTab === 'all'
-                ? "You haven't registered for any events yet. Explore upcoming events and secure your spot today!"
-                : `No registrations found under the "${activeTab}" filter.`}
+                ? "You haven't registered for any events yet. Check out upcoming events and grab a spot!"
+                : `No registrations found under "${activeTab}".`}
             </p>
           </div>
           <Link
@@ -288,7 +288,7 @@ const MyRegistrations = () => {
             className="inline-flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-md shadow-indigo-600/20 transition-all"
           >
             <Compass className="w-4 h-4" />
-            <span>Discover Events Now</span>
+            <span>Browse Events</span>
           </Link>
         </div>
       )}
@@ -299,9 +299,9 @@ const MyRegistrations = () => {
         onClose={() => setIsCancelModalOpen(false)}
         onConfirm={handleConfirmCancel}
         title="Cancel Event Registration?"
-        message={`Are you sure you want to cancel your pass for "${selectedReg?.event?.title}"? Your seat will be returned to the available seat pool.`}
-        confirmText="Yes, Cancel Pass"
-        cancelText="Keep Pass"
+        message={`Are you sure you want to cancel your registration for "${selectedReg?.event?.title}"?`}
+        confirmText="Yes, Cancel"
+        cancelText="Keep"
         isDestructive={true}
         isLoading={cancelling}
       />

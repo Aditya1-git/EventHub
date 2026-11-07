@@ -1,9 +1,7 @@
 const Event = require('../models/Event');
 const Registration = require('../models/Registration');
 
-// @desc    Get all events with search, filters & pagination
-// @route   GET /api/events
-// @access  Public
+// Get events list with search, filter, and pagination
 const getEvents = async (req, res, next) => {
   try {
     const {
@@ -20,8 +18,7 @@ const getEvents = async (req, res, next) => {
 
     const query = {};
 
-    // Search by title or description or venue
-    if (search && search.trim() !== '') {
+    if (search && search.trim()) {
       query.$or = [
         { title: { $regex: search.trim(), $options: 'i' } },
         { description: { $regex: search.trim(), $options: 'i' } },
@@ -29,22 +26,18 @@ const getEvents = async (req, res, next) => {
       ];
     }
 
-    // Category filter
     if (category && category !== 'All') {
       query.category = category;
     }
 
-    // Status filter
     if (status && status !== 'All') {
       query.status = status;
     }
 
-    // Venue filter
-    if (venue && venue.trim() !== '') {
+    if (venue && venue.trim()) {
       query.venue = { $regex: venue.trim(), $options: 'i' };
     }
 
-    // Date range filter
     if (startDate || endDate) {
       query.date = {};
       if (startDate) query.date.$gte = new Date(startDate);
@@ -55,21 +48,16 @@ const getEvents = async (req, res, next) => {
       }
     }
 
-    // Sorting
-    let sortOptions = {};
-    if (sort === 'upcoming' || sort === 'date-asc') {
-      sortOptions = { date: 1 };
-    } else if (sort === 'date-desc') {
+    let sortOptions = { date: 1 };
+    if (sort === 'date-desc') {
       sortOptions = { date: -1 };
     } else if (sort === 'seats') {
       sortOptions = { availableSeats: -1 };
     } else if (sort === 'newest') {
       sortOptions = { createdAt: -1 };
-    } else {
-      sortOptions = { date: 1 };
     }
 
-    const pageNum = parseInt(page, 10) || 1;
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
     const limitNum = parseInt(limit, 10) || 9;
     const skip = (pageNum - 1) * limitNum;
 
@@ -79,7 +67,7 @@ const getEvents = async (req, res, next) => {
       .skip(skip)
       .limit(limitNum);
 
-    res.status(200).json({
+    res.json({
       success: true,
       count: events.length,
       total,
@@ -92,60 +80,13 @@ const getEvents = async (req, res, next) => {
   }
 };
 
-// @desc    Get featured events
-// @route   GET /api/events/featured
-// @access  Public
 const getFeaturedEvents = async (req, res, next) => {
   try {
-    const featured = await Event.find({ isFeatured: true, status: { $ne: 'cancelled' } })
+    const events = await Event.find({ isFeatured: true, status: { $ne: 'cancelled' } })
       .sort({ date: 1 })
       .limit(6);
 
-    res.status(200).json({
-      success: true,
-      count: featured.length,
-      events: featured
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Get single event by ID
-// @route   GET /api/events/:id
-// @access  Public
-const getEventById = async (req, res, next) => {
-  try {
-    const event = await Event.findById(req.params.id);
-
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: 'Event not found'
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      event
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Get events by category
-// @route   GET /api/events/category/:category
-// @access  Public
-const getEventsByCategory = async (req, res, next) => {
-  try {
-    const { category } = req.params;
-    const events = await Event.find({
-      category: new RegExp(`^${category}$`, 'i'),
-      status: { $ne: 'cancelled' }
-    }).sort({ date: 1 });
-
-    res.status(200).json({
+    res.json({
       success: true,
       count: events.length,
       events
@@ -155,9 +96,42 @@ const getEventsByCategory = async (req, res, next) => {
   }
 };
 
-// @desc    Create a new event
-// @route   POST /api/events
-// @access  Private/Admin
+const getEventById = async (req, res, next) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: 'Event not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      event
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getEventsByCategory = async (req, res, next) => {
+  try {
+    const events = await Event.find({
+      category: new RegExp(`^${req.params.category}$`, 'i'),
+      status: { $ne: 'cancelled' }
+    }).sort({ date: 1 });
+
+    res.json({
+      success: true,
+      count: events.length,
+      events
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const createEvent = async (req, res, next) => {
   try {
     const {
@@ -185,8 +159,6 @@ const createEvent = async (req, res, next) => {
       !category ||
       !image ||
       !date ||
-      !startTime ||
-      !endTime ||
       !venue ||
       !organizerName ||
       !organizerEmail ||
@@ -195,18 +167,11 @@ const createEvent = async (req, res, next) => {
     ) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required event details'
+        message: 'Please fill in all required fields'
       });
     }
 
     const seats = parseInt(totalSeats, 10);
-    if (isNaN(seats) || seats < 1) {
-      return res.status(400).json({
-        success: false,
-        message: 'Total seats must be at least 1'
-      });
-    }
-
     const event = await Event.create({
       title,
       shortDescription,
@@ -214,21 +179,21 @@ const createEvent = async (req, res, next) => {
       category,
       image,
       date: new Date(date),
-      startTime,
-      endTime,
+      startTime: startTime || '10:00 AM',
+      endTime: endTime || '05:00 PM',
       venue,
       organizerName,
       organizerEmail,
       totalSeats: seats,
       availableSeats: seats,
       registrationDeadline: new Date(registrationDeadline),
-      isFeatured: isFeatured === true || isFeatured === 'true',
+      isFeatured: Boolean(isFeatured),
       status: status || 'upcoming'
     });
 
     res.status(201).json({
       success: true,
-      message: 'Event created successfully',
+      message: 'Event created',
       event
     });
   } catch (error) {
@@ -236,13 +201,9 @@ const createEvent = async (req, res, next) => {
   }
 };
 
-// @desc    Update an event
-// @route   PUT /api/events/:id
-// @access  Private/Admin
 const updateEvent = async (req, res, next) => {
   try {
     let event = await Event.findById(req.params.id);
-
     if (!event) {
       return res.status(404).json({
         success: false,
@@ -250,17 +211,16 @@ const updateEvent = async (req, res, next) => {
       });
     }
 
-    // Handle seat adjustments if totalSeats is changed
     if (req.body.totalSeats !== undefined) {
       const newTotal = parseInt(req.body.totalSeats, 10);
-      const bookedSeats = event.totalSeats - event.availableSeats;
-      if (newTotal < bookedSeats) {
+      const booked = event.totalSeats - event.availableSeats;
+      if (newTotal < booked) {
         return res.status(400).json({
           success: false,
-          message: `Cannot reduce total seats below already booked seats (${bookedSeats})`
+          message: `Total seats cannot be less than already booked seats (${booked})`
         });
       }
-      req.body.availableSeats = newTotal - bookedSeats;
+      req.body.availableSeats = newTotal - booked;
     }
 
     event = await Event.findByIdAndUpdate(req.params.id, req.body, {
@@ -268,9 +228,9 @@ const updateEvent = async (req, res, next) => {
       runValidators: true
     });
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: 'Event updated successfully',
+      message: 'Event updated',
       event
     });
   } catch (error) {
@@ -278,13 +238,9 @@ const updateEvent = async (req, res, next) => {
   }
 };
 
-// @desc    Delete an event
-// @route   DELETE /api/events/:id
-// @access  Private/Admin
 const deleteEvent = async (req, res, next) => {
   try {
     const event = await Event.findById(req.params.id);
-
     if (!event) {
       return res.status(404).json({
         success: false,
@@ -292,7 +248,7 @@ const deleteEvent = async (req, res, next) => {
       });
     }
 
-    // Also cancel or delete associated registrations or notify
+    // Cancel related registrations
     await Registration.updateMany(
       { event: event._id },
       { registrationStatus: 'cancelled' }
@@ -300,9 +256,9 @@ const deleteEvent = async (req, res, next) => {
 
     await Event.findByIdAndDelete(req.params.id);
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: 'Event and associated registrations deleted successfully'
+      message: 'Event deleted'
     });
   } catch (error) {
     next(error);

@@ -14,22 +14,18 @@ const seedData = async (isCli = false) => {
     if (mongoose.connection.readyState !== 1) {
       await mongoose.connect(mongoUri);
     }
-    console.log('Connected to MongoDB for seeding...');
+    console.log('Seeding database...');
 
-    // Clear existing collections
     await User.deleteMany();
     await Event.deleteMany();
     await Registration.deleteMany();
-    console.log('Cleaned existing collections.');
 
-    // 1. Create Admin and Demo User
     const adminPassword = await bcrypt.hash('Admin@123', 10);
     const userPassword = await bcrypt.hash('User@123', 10);
-    const sarahPassword = await bcrypt.hash('User@123', 10);
 
     const users = await User.insertMany([
       {
-        name: 'EventHub Administrator',
+        name: 'Admin User',
         email: 'admin@eventhub.com',
         phone: '+1 555-0199',
         password: adminPassword,
@@ -48,7 +44,7 @@ const seedData = async (isCli = false) => {
         name: 'Sarah Williams',
         email: 'sarah.w@example.com',
         phone: '+1 555-0177',
-        password: sarahPassword,
+        password: userPassword,
         role: 'user',
         createdAt: new Date('2026-02-15')
       },
@@ -62,212 +58,202 @@ const seedData = async (isCli = false) => {
       }
     ]);
 
-    const adminUser = users[0];
     const demoUser = users[1];
     const userSarah = users[2];
     const userMichael = users[3];
 
-    console.log('Created Users: Admin & 3 Users.');
-
-    // 2. Create Events (10 diverse, realistic events)
     const now = new Date();
-    const addDays = (days) => {
-      const d = new Date(now);
-      d.setDate(d.getDate() + days);
-      return d;
-    };
+    const addDays = (d) => new Date(now.getTime() + d * 24 * 60 * 60 * 1000);
 
     const eventsData = [
       {
         title: 'National Coding Hackathon 2026',
-        shortDescription: '48-hour intense coding marathon with real-world industry challenges and cash prizes.',
-        description: 'Join over 500 developers, designers, and innovators at the National Coding Hackathon 2026. Build innovative solutions for healthcare, sustainability, and fintech. Mentors from top tech enterprises will guide teams through workshops and pitch sessions. Food, swag, and cloud credits provided for all participants.',
+        shortDescription: 'Build cool tech projects over a 48-hour weekend sprint. Free food, stickers, and cash prizes for the top teams.',
+        description: 'Our annual flagship hackathon is back! Form a team of up to 4 members or join solo and get matched on day one. We have mentors from local startups helping you build web apps, AI tools, and mobile solutions. Cloud credits, meals, and snacks are provided throughout the weekend.',
         category: 'Hackathons',
         image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80',
         date: addDays(14),
         startTime: '09:00 AM',
         endTime: '06:00 PM',
-        venue: 'Grand Innovation Arena, Silicon Boulevard, Tech Hub',
-        organizerName: 'TechVanguard Foundation',
-        organizerEmail: 'hackathon@techvanguard.org',
-        totalSeats: 250,
-        availableSeats: 247,
+        venue: 'Engineering Block 3, Main Auditorium',
+        organizerName: 'Campus Tech Club',
+        organizerEmail: 'hackathon@campustech.org',
+        totalSeats: 200,
+        availableSeats: 197,
         registrationDeadline: addDays(10),
         isFeatured: true,
         status: 'upcoming'
       },
       {
-        title: 'Global AI & Machine Learning Summit',
-        shortDescription: 'Explore generative AI frontiers, LLM deployment, and modern neural architectures.',
-        description: 'The premier AI conference bringing together researchers, data scientists, and engineering leaders. Keynotes from industry pioneers on Foundation Models, RAG pipelines, Autonomous Agents, and Ethical AI. Includes interactive demo pods and high-impact networking lounges.',
+        title: 'Introduction to Generative AI & LLMs',
+        shortDescription: 'Hands-on seminar on using open source language models, prompt engineering, and building retrieval apps.',
+        description: 'An interactive seminar breaking down how modern language models work under the hood. We will walk through building a simple Q&A assistant with Python, LangChain, and Ollama running locally. Perfect for beginners and intermediate developers.',
         category: 'Technology',
         image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80',
         date: addDays(25),
         startTime: '10:00 AM',
-        endTime: '05:30 PM',
-        venue: 'Metropolitan Convention Center, Auditorium A',
-        organizerName: 'AI Horizons Institute',
-        organizerEmail: 'summit@aihorizons.io',
-        totalSeats: 350,
-        availableSeats: 348,
+        endTime: '04:00 PM',
+        venue: 'Computer Science Lab 2',
+        organizerName: 'AI Student Chapter',
+        organizerEmail: 'contact@aistudents.edu',
+        totalSeats: 120,
+        availableSeats: 118,
         registrationDeadline: addDays(20),
         isFeatured: true,
         status: 'upcoming'
       },
       {
-        title: 'Full Stack Modern Web Engineering Masterclass',
-        shortDescription: 'Hands-on intensive masterclass on React 19, Node.js microservices, and modern state architecture.',
-        description: 'A deep-dive workshop for intermediate to senior developers looking to level up their architecture skills. We will build, benchmark, and deploy a distributed scalable application using React, Vite, Node, and MongoDB with production performance optimizations and security best practices.',
+        title: 'Full Stack React & Node.js Workshop',
+        shortDescription: 'Build and deploy a full stack web application from scratch with React, Express, and MongoDB.',
+        description: 'A 4-hour hands-on workshop where we build a working web app together. We will cover REST APIs, JWT authentication, React state management, and deploying on cloud platforms. Bring your laptop with Node.js and VS Code installed!',
         category: 'Workshops',
         image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80',
         date: addDays(7),
         startTime: '11:00 AM',
-        endTime: '04:00 PM',
-        venue: 'DevLaunch Campus, Studio 4',
-        organizerName: 'FullStack Guild',
-        organizerEmail: 'workshops@fullstackguild.dev',
-        totalSeats: 80,
-        availableSeats: 78,
+        endTime: '03:30 PM',
+        venue: 'Seminar Hall B, Innovation Center',
+        organizerName: 'Web Developers Guild',
+        organizerEmail: 'workshops@webguild.dev',
+        totalSeats: 70,
+        availableSeats: 68,
         registrationDeadline: addDays(5),
         isFeatured: true,
         status: 'upcoming'
       },
       {
-        title: 'Annual Inter-College Cultural Fest "Kaleidoscope"',
-        shortDescription: 'Three days of vibrant music, drama, dance showcases, fashion shows, and art installations.',
-        description: 'Kaleidoscope is the most anticipated cultural celebration of the season. Featuring live performances from headline indie artists, competitive collegiate dance battles, street play theatre, culinary stalls, and digital media exhibitions. Celebrate art, creativity, and student passion.',
+        title: 'Annual Cultural Fest - Kaleidoscope',
+        shortDescription: '3 days of live music, dance showcases, street theatre, art exhibitions, and food stalls.',
+        description: 'The biggest student celebration of the year! Enjoy live performances from indie college bands, competitive dance battles, photography galleries, and delicious street food stalls. Entry is free for all registered students.',
         category: 'Cultural Events',
         image: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80',
         date: addDays(30),
         startTime: '04:00 PM',
-        endTime: '11:00 PM',
-        venue: 'University Central Amphitheatre',
+        endTime: '10:00 PM',
+        venue: 'Open Air Amphitheatre',
         organizerName: 'Student Union Council',
-        organizerEmail: 'kaleidoscope@university.edu',
-        totalSeats: 600,
-        availableSeats: 597,
+        organizerEmail: 'council@studentunion.edu',
+        totalSeats: 500,
+        availableSeats: 497,
         registrationDeadline: addDays(28),
         isFeatured: true,
         status: 'upcoming'
       },
       {
-        title: 'Tech Founders & Angel Investors Summit',
-        shortDescription: 'Connect with top venture capitalists, pitch your seed idea, and learn scaling tactics.',
-        description: 'An exclusive assembly designed for early-stage startup founders, operators, and active angel investors. Featuring pitch sessions, fundraising teardowns, roundtable strategy lunches, and legal advisory clinics for high-growth tech entrepreneurs.',
+        title: 'Student Startup Pitch & Networking Night',
+        shortDescription: 'Pitch your project or idea to alumni founders and angel investors. Great chance to find co-founders.',
+        description: 'Looking to build a startup or find like-minded teammates? Pitch your project in a 3-minute lightning talk, or just come listen and network over pizza. Several alumni mentors will be present to give candid feedback.',
         category: 'Business',
         image: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=1200&q=80',
         date: addDays(18),
-        startTime: '09:30 AM',
-        endTime: '05:00 PM',
-        venue: 'Starlight Financial Center, 32nd Floor Ballroom',
-        organizerName: 'VentureCatalyst Network',
-        organizerEmail: 'connect@venturecatalyst.co',
-        totalSeats: 150,
-        availableSeats: 148,
+        startTime: '05:00 PM',
+        endTime: '08:00 PM',
+        venue: 'Student Activity Center, Room 101',
+        organizerName: 'E-Cell',
+        organizerEmail: 'ecell@campusstartups.org',
+        totalSeats: 100,
+        availableSeats: 98,
         registrationDeadline: addDays(14),
         isFeatured: true,
         status: 'upcoming'
       },
       {
-        title: 'Symphonic Nights: Classical & Electronic Fusion',
-        shortDescription: 'An electrifying sensory experience blending classical orchestral arrangement with ambient electronic soundscapes.',
-        description: 'Immerse your senses in a one-of-a-kind musical spectacle. The Metropolitan Youth Philharmonic collaborates with world-renowned synthesizer artists and light sculptors to reimagine modern symphonic masterpieces in surround acoustic audio.',
+        title: 'Acoustic & Indie Music Night',
+        shortDescription: 'An evening of live acoustic performances by campus bands, solo singers, and beatboxers.',
+        description: 'Relax and unwind with unplugged music sets. We have 8 student bands lined up playing indie rock, pop covers, and original acoustic tracks. Refreshments will be served.',
         category: 'Music',
         image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
         date: addDays(21),
-        startTime: '07:30 PM',
-        endTime: '10:30 PM',
-        venue: 'Aria Concert Hall, Downtown Cultural District',
-        organizerName: 'Harmonic Arts Foundation',
-        organizerEmail: 'boxoffice@harmonicarts.org',
-        totalSeats: 400,
-        availableSeats: 398,
+        startTime: '06:30 PM',
+        endTime: '09:30 PM',
+        venue: 'Music Club Lounge',
+        organizerName: 'Music Society',
+        organizerEmail: 'music@campusculture.org',
+        totalSeats: 150,
+        availableSeats: 148,
         registrationDeadline: addDays(19),
         isFeatured: false,
         status: 'upcoming'
       },
       {
-        title: 'UI/UX Design Systems Workshop 2026',
-        shortDescription: 'Learn to build scalable design tokens, accessible components, and seamless developer handoff.',
-        description: 'Learn modern Figma component architectures, design tokens with style-dictionary, WCAG 2.2 accessibility compliance, and streamlined Figma-to-code pipelines. Perfect for product designers and frontend developers seeking design system mastery.',
+        title: 'UI/UX Design with Figma: From Wireframe to Prototype',
+        shortDescription: 'Learn design fundamentals, component variants, auto-layout, and prototyping in Figma.',
+        description: 'Good software starts with good design. In this hands-on workshop, you will learn practical Figma workflows: grid systems, color palettes, interactive components, and creating clickable prototypes for mobile apps.',
         category: 'Workshops',
         image: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=1200&q=80',
         date: addDays(9),
-        startTime: '01:00 PM',
-        endTime: '06:00 PM',
-        venue: 'Creativity Loft, 4th Avenue Creative Quarter',
-        organizerName: 'DesignCraft Collective',
-        organizerEmail: 'hello@designcraft.studio',
-        totalSeats: 60,
-        availableSeats: 58,
+        startTime: '02:00 PM',
+        endTime: '05:00 PM',
+        venue: 'Design Studio, Architecture Wing',
+        organizerName: 'Designers Collective',
+        organizerEmail: 'design@campusclub.org',
+        totalSeats: 50,
+        availableSeats: 48,
         registrationDeadline: addDays(7),
         isFeatured: false,
         status: 'upcoming'
       },
       {
-        title: 'Inter-University Esports & Sports Championship',
-        shortDescription: 'Multi-day athletics and competitive esports tournament featuring soccer, basketball, and Valorant.',
-        description: 'Watch the highest level of collegiate athleticism and esports excellence. Teams from 24 universities battle for trophies, scholarships, and glory across outdoor sports and staged gaming arenas with live shoutcasting.',
+        title: 'Inter-Department Football & Gaming Tournament',
+        shortDescription: 'Compete for the department trophy in 7-a-side football and campus FIFA/Valorant brackets.',
+        description: 'Gather your department friends and enter the weekend sports cup! Football matches run on the main turf during the day, followed by esports finals in the evening auditorium. Trophies and medals for winners.',
         category: 'Sports',
         image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80',
-        date: addDays(40),
-        startTime: '08:00 AM',
-        endTime: '08:00 PM',
-        venue: 'Olympic Sports Complex & Esports Arena',
-        organizerName: 'Collegiate Athletics League',
-        organizerEmail: 'championship@collegiatesports.org',
-        totalSeats: 800,
-        availableSeats: 799,
-        registrationDeadline: addDays(35),
+        date: addDays(35),
+        startTime: '08:30 AM',
+        endTime: '07:00 PM',
+        venue: 'University Sports Ground & Gaming Lab',
+        organizerName: 'Sports Committee',
+        organizerEmail: 'sports@universitysports.edu',
+        totalSeats: 300,
+        availableSeats: 299,
+        registrationDeadline: addDays(30),
         isFeatured: false,
         status: 'upcoming'
       },
       {
-        title: 'Competitive Programming Masterclass & Mock Contest',
-        shortDescription: 'Master graph algorithms, dynamic programming, and data structures for ACM-ICPC and tech interviews.',
-        description: 'Sharpen your competitive coding skills under the guidance of International Grandmasters. Solve challenging problems on advanced tree algorithms, combinatorics, and dynamic programming with live leaderboard feedback.',
+        title: 'Competitive Programming: Graphs & Trees Masterclass',
+        shortDescription: 'Solve interview-level graph problems: BFS/DFS, Dijkstra, tree traversals, and dynamic programming.',
+        description: 'Prepare for software engineering coding rounds. We will solve 6 classic LeetCode Medium/Hard problems on graphs and trees with live code explanations and time complexity tips.',
         category: 'Education',
         image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80',
         date: addDays(12),
-        startTime: '02:00 PM',
-        endTime: '06:30 PM',
-        venue: 'Science Block, Lab 3, Institute of Technology',
-        organizerName: 'Algorithmic Society',
-        organizerEmail: 'info@algosoc.org',
-        totalSeats: 120,
-        availableSeats: 119,
+        startTime: '03:00 PM',
+        endTime: '06:00 PM',
+        venue: 'Lecture Hall 4',
+        organizerName: 'Coding Club',
+        organizerEmail: 'algo@codingclub.org',
+        totalSeats: 90,
+        availableSeats: 89,
         registrationDeadline: addDays(10),
         isFeatured: false,
         status: 'upcoming'
       },
       {
-        title: 'Global Sustainable Tech & Green Energy Expo',
-        shortDescription: 'Showcasing breakthroughs in clean energy, battery innovations, smart grid IoT, and carbon capture.',
-        description: 'Explore the technologies driving decarbonization and green energy independence. Network with policy leaders, climate tech startup innovators, and university researchers deploying next-gen solutions globally.',
+        title: 'Clean Energy & Smart Hardware Exhibition',
+        shortDescription: 'Student IoT and renewable energy hardware projects showcase with live demonstrations.',
+        description: 'See innovative student hardware projects in action: solar trackers, EV battery monitors, and smart home IoT devices built by electrical and mechanical engineering students.',
         category: 'Technology',
         image: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&w=1200&q=80',
-        date: addDays(45),
-        startTime: '09:00 AM',
-        endTime: '06:00 PM',
-        venue: 'EcoPlaza Exhibition Center',
-        organizerName: 'CleanTech Global Initiative',
-        organizerEmail: 'expo@cleantechglobal.org',
-        totalSeats: 500,
-        availableSeats: 500,
-        registrationDeadline: addDays(42),
+        date: addDays(40),
+        startTime: '10:00 AM',
+        endTime: '04:00 PM',
+        venue: 'Robotics Workshop Hall',
+        organizerName: 'Hardware Innovators Society',
+        organizerEmail: 'hardware@campusinnovations.org',
+        totalSeats: 200,
+        availableSeats: 200,
+        registrationDeadline: addDays(36),
         isFeatured: false,
         status: 'upcoming'
       }
     ];
 
     const createdEvents = await Event.insertMany(eventsData);
-    console.log(`Created ${createdEvents.length} events across all categories.`);
 
-    // 3. Create Sample Registrations for Demo Users
     const registrationsData = [
       {
         user: demoUser._id,
-        event: createdEvents[0]._id, // Hackathon
+        event: createdEvents[0]._id,
         participantName: demoUser.name,
         email: demoUser.email,
         phone: demoUser.phone,
@@ -276,7 +262,7 @@ const seedData = async (isCli = false) => {
       },
       {
         user: demoUser._id,
-        event: createdEvents[1]._id, // AI Summit
+        event: createdEvents[1]._id,
         participantName: demoUser.name,
         email: demoUser.email,
         phone: demoUser.phone,
@@ -285,7 +271,7 @@ const seedData = async (isCli = false) => {
       },
       {
         user: userSarah._id,
-        event: createdEvents[0]._id, // Hackathon
+        event: createdEvents[0]._id,
         participantName: userSarah.name,
         email: userSarah.email,
         phone: userSarah.phone,
@@ -294,7 +280,7 @@ const seedData = async (isCli = false) => {
       },
       {
         user: userSarah._id,
-        event: createdEvents[2]._id, // Full Stack Masterclass
+        event: createdEvents[2]._id,
         participantName: userSarah.name,
         email: userSarah.email,
         phone: userSarah.phone,
@@ -303,7 +289,7 @@ const seedData = async (isCli = false) => {
       },
       {
         user: userMichael._id,
-        event: createdEvents[0]._id, // Hackathon
+        event: createdEvents[0]._id,
         participantName: userMichael.name,
         email: userMichael.email,
         phone: userMichael.phone,
@@ -312,7 +298,7 @@ const seedData = async (isCli = false) => {
       },
       {
         user: userMichael._id,
-        event: createdEvents[3]._id, // Cultural Fest
+        event: createdEvents[3]._id,
         participantName: userMichael.name,
         email: userMichael.email,
         phone: userMichael.phone,
@@ -321,7 +307,7 @@ const seedData = async (isCli = false) => {
       },
       {
         user: userMichael._id,
-        event: createdEvents[4]._id, // Founders Summit
+        event: createdEvents[4]._id,
         participantName: userMichael.name,
         email: userMichael.email,
         phone: userMichael.phone,
@@ -330,7 +316,7 @@ const seedData = async (isCli = false) => {
       },
       {
         user: demoUser._id,
-        event: createdEvents[6]._id, // UI/UX Workshop
+        event: createdEvents[6]._id,
         participantName: demoUser.name,
         email: demoUser.email,
         phone: demoUser.phone,
@@ -340,15 +326,8 @@ const seedData = async (isCli = false) => {
     ];
 
     await Registration.insertMany(registrationsData);
-    console.log(`Created ${registrationsData.length} sample registrations.`);
 
-    console.log('Seeding completed successfully!');
-    console.log('----------------------------------------------------');
-    console.log('Demo Credentials:');
-    console.log('Admin Account: admin@eventhub.com / Admin@123');
-    console.log('User Account:  user@eventhub.com  / User@123');
-    console.log('----------------------------------------------------');
-
+    console.log('Seeding finished successfully.');
     if (isCli) {
       process.exit(0);
     }
@@ -359,7 +338,7 @@ const seedData = async (isCli = false) => {
       registrationsCount: registrationsData.length
     };
   } catch (error) {
-    console.error('Error during database seeding:', error);
+    console.error('Seeding error:', error.message);
     if (isCli) {
       process.exit(1);
     }

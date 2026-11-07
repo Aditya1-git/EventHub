@@ -95,11 +95,11 @@ const ManageEvents = () => {
       {/* Top Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
             Manage Events
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-            Create, update, monitor, and remove events across the platform.
+            View, edit, or add events on the platform.
           </p>
         </div>
 
@@ -182,7 +182,7 @@ const ManageEvents = () => {
       <div className="rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-sm">
         {loading ? (
           <div className="py-20 flex justify-center">
-            <LoadingSpinner size="md" text="Loading events table..." />
+            <LoadingSpinner size="md" text="Loading events..." />
           </div>
         ) : events.length > 0 ? (
           <div className="overflow-x-auto">

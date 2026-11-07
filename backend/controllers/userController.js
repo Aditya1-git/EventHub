@@ -2,9 +2,6 @@ const User = require('../models/User');
 const Registration = require('../models/Registration');
 const bcrypt = require('bcryptjs');
 
-// @desc    Get user profile with registration summary
-// @route   GET /api/users/profile
-// @access  Private
 const getUserProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
@@ -15,23 +12,19 @@ const getUserProfile = async (req, res, next) => {
       });
     }
 
-    const totalRegistrations = await Registration.countDocuments({ user: user._id });
-    const confirmedRegistrations = await Registration.countDocuments({
-      user: user._id,
-      registrationStatus: 'confirmed'
-    });
-    const cancelledRegistrations = await Registration.countDocuments({
-      user: user._id,
-      registrationStatus: 'cancelled'
-    });
+    const [total, confirmed, cancelled] = await Promise.all([
+      Registration.countDocuments({ user: user._id }),
+      Registration.countDocuments({ user: user._id, registrationStatus: 'confirmed' }),
+      Registration.countDocuments({ user: user._id, registrationStatus: 'cancelled' })
+    ]);
 
-    res.status(200).json({
+    res.json({
       success: true,
       user,
       stats: {
-        totalRegistrations,
-        confirmedRegistrations,
-        cancelledRegistrations
+        totalRegistrations: total,
+        confirmedRegistrations: confirmed,
+        cancelledRegistrations: cancelled
       }
     });
   } catch (error) {
@@ -39,13 +32,9 @@ const getUserProfile = async (req, res, next) => {
   }
 };
 
-// @desc    Update user profile & password
-// @route   PUT /api/users/profile
-// @access  Private
 const updateUserProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).select('+password');
-
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -58,12 +47,11 @@ const updateUserProfile = async (req, res, next) => {
     if (name) user.name = name.trim();
     if (phone) user.phone = phone.trim();
 
-    // Change password if provided
     if (newPassword) {
       if (!currentPassword) {
         return res.status(400).json({
           success: false,
-          message: 'Current password is required to set a new password'
+          message: 'Current password is required to change password'
         });
       }
 
@@ -71,7 +59,7 @@ const updateUserProfile = async (req, res, next) => {
       if (!isMatch) {
         return res.status(400).json({
           success: false,
-          message: 'Incorrect current password'
+          message: 'Current password does not match'
         });
       }
 
@@ -88,9 +76,9 @@ const updateUserProfile = async (req, res, next) => {
 
     await user.save();
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: 'Profile updated successfully',
+      message: 'Profile updated',
       user: {
         _id: user._id,
         name: user.name,

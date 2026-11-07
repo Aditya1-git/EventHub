@@ -101,7 +101,7 @@ const EventDetails = () => {
   if (loading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Loading event details..." />
+        <LoadingSpinner size="lg" text="Loading..." />
       </div>
     );
   }
@@ -348,7 +348,7 @@ const EventDetails = () => {
               ) : isSoldOut ? (
                 <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-sm font-semibold flex items-center space-x-2">
                   <AlertTriangle className="w-5 h-5 flex-shrink-0 text-rose-600" />
-                  <span>Sold Out: Maximum capacity reached.</span>
+                  <span>Event is full. No seats remaining.</span>
                 </div>
               ) : (
                 <button
@@ -357,7 +357,7 @@ const EventDetails = () => {
                   className="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-black text-base shadow-xl shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2"
                 >
                   <Sparkles className="w-5 h-5" />
-                  <span>Register Now (Free)</span>
+                  <span>Register Now</span>
                 </button>
               )}
 
@@ -366,7 +366,7 @@ const EventDetails = () => {
                   to="/my-registrations"
                   className="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold text-center block transition-colors"
                 >
-                  Manage in My Registrations
+                  View in My Registrations
                 </Link>
               )}
             </div>

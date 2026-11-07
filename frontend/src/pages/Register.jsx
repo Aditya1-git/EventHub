@@ -85,7 +85,7 @@ const Register = () => {
             Create Your Account
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Join thousands of innovators and enthusiasts on EventHub.
+            Sign up to discover and register for upcoming events.
           </p>
         </div>
 

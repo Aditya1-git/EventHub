@@ -10,18 +10,9 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
   Legend
 } from 'recharts';
-import {
-  TrendingUp,
-  BarChart3,
-  Percent,
-  CheckCircle,
-  CalendarDays,
-  Sparkles
-} from 'lucide-react';
+import { TrendingUp, Percent } from 'lucide-react';
 import api from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
@@ -40,7 +31,7 @@ const Analytics = () => {
           setAnalytics(res.data.analytics);
         }
       } catch (err) {
-        console.error('Error fetching analytics:', err);
+        console.error('Failed to load analytics:', err);
       } finally {
         setLoading(false);
       }
@@ -52,7 +43,7 @@ const Analytics = () => {
   if (loading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Crunching MongoDB aggregation metrics..." />
+        <LoadingSpinner size="lg" text="Loading analytics..." />
       </div>
     );
   }
@@ -66,33 +57,30 @@ const Analytics = () => {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Top Header */}
+      {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-          Platform Analytics & Aggregations
+        <h1 className="text-2xl sm:text-3xl font-bold text-white">
+          Analytics
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-          Deep database insights generated using Mongoose pipeline aggregation queries.
+          Booking trends and attendance statistics.
         </p>
       </div>
 
-      {/* Grid 1: Monthly Trends & Category Performance */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Monthly Trends */}
-        <div className="lg:col-span-8 p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-white flex items-center space-x-2">
-                <TrendingUp className="w-4 h-4 text-indigo-400" />
-                <span>Monthly Registration Volume (Last 6 Months)</span>
-              </h2>
-              <p className="text-xs text-slate-400">
-                Tracking confirmed vs. cancelled passes per month.
-              </p>
-            </div>
+      {/* Grid 1: Monthly Trends & Category Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8 p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+          <div>
+            <h2 className="text-sm font-bold text-white flex items-center space-x-2">
+              <TrendingUp className="w-4 h-4 text-indigo-400" />
+              <span>Monthly Bookings (Last 6 Months)</span>
+            </h2>
+            <p className="text-xs text-slate-400">
+              Confirmed vs cancelled passes per month
+            </p>
           </div>
 
-          <div className="h-72 w-full pt-4">
+          <div className="h-64 w-full pt-2">
             {monthlyTrends.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyTrends}>
@@ -103,36 +91,35 @@ const Analytics = () => {
                     contentStyle={{
                       backgroundColor: '#0f172a',
                       borderColor: '#334155',
-                      borderRadius: '12px',
+                      borderRadius: '8px',
                       color: '#fff',
                       fontSize: '12px'
                     }}
                   />
                   <Legend />
-                  <Bar dataKey="confirmed" fill="#10b981" name="Confirmed Passes" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="cancelled" fill="#f43f5e" name="Cancelled Passes" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="confirmed" fill="#10b981" name="Confirmed" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="cancelled" fill="#f43f5e" name="Cancelled" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex items-center justify-center text-xs text-slate-500">
-                No monthly data logged yet.
+                No monthly data recorded yet.
               </div>
             )}
           </div>
         </div>
 
-        {/* Category Performance */}
-        <div className="lg:col-span-4 p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+        <div className="lg:col-span-4 p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
           <div>
-            <h2 className="text-base font-bold text-white">
-              Category Popularity
+            <h2 className="text-sm font-bold text-white">
+              Category Share
             </h2>
             <p className="text-xs text-slate-400">
-              Registrations by event category.
+              Total passes by category
             </p>
           </div>
 
-          <div className="h-72 w-full flex items-center justify-center">
+          <div className="h-64 w-full flex items-center justify-center">
             {categoryPerformance.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -140,24 +127,21 @@ const Analytics = () => {
                     data={categoryPerformance}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={4}
+                    innerRadius={45}
+                    outerRadius={75}
+                    paddingAngle={3}
                     dataKey="registrations"
                     nameKey="category"
                   >
                     {categoryPerformance.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#0f172a',
                       borderColor: '#334155',
-                      borderRadius: '12px',
+                      borderRadius: '8px',
                       color: '#fff',
                       fontSize: '12px'
                     }}
@@ -165,40 +149,39 @@ const Analytics = () => {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-xs text-slate-500">No category registrations yet.</p>
+              <p className="text-xs text-slate-500">No category data yet.</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Grid 2: Event Occupancy Rates & Event Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Occupancy Rate Table */}
-        <div className="lg:col-span-8 p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+      {/* Grid 2: Occupancy Table & Status Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-8 p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
           <div>
-            <h2 className="text-base font-bold text-white flex items-center space-x-2">
+            <h2 className="text-sm font-bold text-white flex items-center space-x-2">
               <Percent className="w-4 h-4 text-indigo-400" />
-              <span>Event Seat Occupancy Rates</span>
+              <span>Seat Occupancy Rates</span>
             </h2>
             <p className="text-xs text-slate-400">
-              Percentage of capacity filled per top active event.
+              Capacity filled per event
             </p>
           </div>
 
-          <div className="overflow-x-auto pt-2">
+          <div className="overflow-x-auto pt-1">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-800/60 uppercase font-bold text-slate-400 border-b border-slate-800">
+              <thead className="bg-slate-800/60 uppercase font-semibold text-slate-400 border-b border-slate-800">
                 <tr>
-                  <th className="py-2.5 px-3">Event Title</th>
-                  <th className="py-2.5 px-3">Category</th>
-                  <th className="py-2.5 px-3">Booked / Total</th>
-                  <th className="py-2.5 px-3">Fill Rate</th>
+                  <th className="py-2 px-3">Event</th>
+                  <th className="py-2 px-3">Category</th>
+                  <th className="py-2 px-3">Booked / Total</th>
+                  <th className="py-2 px-3">Fill Rate</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/80">
+              <tbody className="divide-y divide-slate-800">
                 {eventOccupancy.map((item) => (
                   <tr key={item._id} className="hover:bg-slate-800/30">
-                    <td className="py-2.5 px-3 font-bold text-white max-w-[220px] truncate">
+                    <td className="py-2.5 px-3 font-semibold text-white max-w-[200px] truncate">
                       {item.title}
                     </td>
                     <td className="py-2.5 px-3 text-indigo-400">{item.category}</td>
@@ -207,13 +190,13 @@ const Analytics = () => {
                     </td>
                     <td className="py-2.5 px-3">
                       <div className="flex items-center space-x-2">
-                        <div className="w-24 h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="w-20 h-2 bg-slate-800 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-indigo-500 rounded-full"
                             style={{ width: `${item.occupancyRate}%` }}
                           />
                         </div>
-                        <span className="font-bold text-white text-[11px]">
+                        <span className="font-semibold text-white text-[11px]">
                           {item.occupancyRate}%
                         </span>
                       </div>
@@ -225,26 +208,25 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* Event Status Distribution */}
-        <div className="lg:col-span-4 p-6 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
+        <div className="lg:col-span-4 p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
           <div>
-            <h2 className="text-base font-bold text-white">
-              Lifecycle Breakdown
+            <h2 className="text-sm font-bold text-white">
+              Status Breakdown
             </h2>
             <p className="text-xs text-slate-400">
-              Distribution of event statuses across MongoDB.
+              Events by current state
             </p>
           </div>
 
-          <div className="space-y-3 pt-2">
+          <div className="space-y-2.5 pt-1">
             {statusBreakdown.map((item) => (
               <div
                 key={item.status}
-                className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-between"
+                className="p-3 rounded-xl bg-slate-800/70 border border-slate-700/60 flex items-center justify-between text-xs"
               >
-                <div className="flex items-center space-x-2.5">
+                <div className="flex items-center space-x-2">
                   <span
-                    className={`w-3 h-3 rounded-full ${
+                    className={`w-2.5 h-2.5 rounded-full ${
                       item.status === 'upcoming'
                         ? 'bg-emerald-400'
                         : item.status === 'completed'
@@ -254,11 +236,11 @@ const Analytics = () => {
                         : 'bg-rose-400'
                     }`}
                   />
-                  <span className="text-xs font-bold capitalize text-white">
-                    {item.status} Events
+                  <span className="font-semibold capitalize text-white">
+                    {item.status}
                   </span>
                 </div>
-                <span className="text-sm font-black text-white font-mono">
+                <span className="font-bold text-white font-mono">
                   {item.count}
                 </span>
               </div>

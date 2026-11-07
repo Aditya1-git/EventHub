@@ -121,7 +121,7 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Loading your profile..." />
+        <LoadingSpinner size="lg" text="Loading profile..." />
       </div>
     );
   }
@@ -144,7 +144,7 @@ const Profile = () => {
           User Profile
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Manage your personal information, credentials, and review your activity stats.
+          Manage your personal details and change your password.
         </p>
       </div>
 
@@ -155,7 +155,7 @@ const Profile = () => {
             <Ticket className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Bookings</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Registrations</p>
             <p className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{stats.totalRegistrations}</p>
           </div>
         </div>
@@ -165,7 +165,7 @@ const Profile = () => {
             <CheckCircle className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Confirmed Passes</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Confirmed</p>
             <p className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{stats.confirmedRegistrations}</p>
           </div>
         </div>
@@ -175,7 +175,7 @@ const Profile = () => {
             <XCircle className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Cancelled Passes</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Cancelled</p>
             <p className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{stats.cancelledRegistrations}</p>
           </div>
         </div>
@@ -190,7 +190,7 @@ const Profile = () => {
               <span>Personal Details</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Update your name and primary contact number.
+              Update your name and phone number.
             </p>
           </div>
 
@@ -255,7 +255,7 @@ const Profile = () => {
               <span>Change Password</span>
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Ensure your account is using a long, secure password.
+              Update your account password.
             </p>
           </div>
 

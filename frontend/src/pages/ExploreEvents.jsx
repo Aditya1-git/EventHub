@@ -83,7 +83,7 @@ const ExploreEvents = () => {
           Explore Events
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 max-w-2xl">
-          Browse upcoming hackathons, workshops, cultural summits, and seminars with real-time seat tracking.
+          Find hackathons, workshops, music fests, and campus meetups.
         </p>
       </div>
 
@@ -254,7 +254,7 @@ const ExploreEvents = () => {
               No matching events found
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-              We couldn't find any events matching your current search parameters. Try loosening your keywords or reset all filters.
+              No events found matching your search. Try changing your filters or searching for something else.
             </p>
           </div>
           <button
@@ -262,7 +262,7 @@ const ExploreEvents = () => {
             className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-md shadow-indigo-500/20 transition-all inline-flex items-center space-x-2"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Reset All Filters</span>
+            <span>Reset filters</span>
           </button>
         </div>
       )}

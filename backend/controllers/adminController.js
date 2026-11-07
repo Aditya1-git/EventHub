@@ -2,9 +2,7 @@ const Event = require('../models/Event');
 const User = require('../models/User');
 const Registration = require('../models/Registration');
 
-// @desc    Get Admin Dashboard Overview Stats & Charts Data
-// @route   GET /api/admin/dashboard
-// @access  Private/Admin
+// Dashboard summary stats and charts
 const getDashboardStats = async (req, res, next) => {
   try {
     const [
@@ -23,16 +21,12 @@ const getDashboardStats = async (req, res, next) => {
       Registration.countDocuments({ registrationStatus: 'cancelled' })
     ]);
 
-    // 1. Registrations over time (Last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // Registrations in the last 30 days
+    const past30Days = new Date();
+    past30Days.setDate(past30Days.getDate() - 30);
 
     const registrationsOverTime = await Registration.aggregate([
-      {
-        $match: {
-          registeredAt: { $gte: thirtyDaysAgo }
-        }
-      },
+      { $match: { registeredAt: { $gte: past30Days } } },
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$registeredAt' } },
@@ -49,7 +43,7 @@ const getDashboardStats = async (req, res, next) => {
       }
     ]);
 
-    // 2. Category distribution of events
+    // Breakdown by category
     const categoryDistribution = await Event.aggregate([
       {
         $group: {
@@ -67,11 +61,9 @@ const getDashboardStats = async (req, res, next) => {
       { $sort: { value: -1 } }
     ]);
 
-    // 3. Most popular events by registrations
+    // Top 5 popular events
     const popularEvents = await Registration.aggregate([
-      {
-        $match: { registrationStatus: 'confirmed' }
-      },
+      { $match: { registrationStatus: 'confirmed' } },
       {
         $group: {
           _id: '$event',
@@ -102,7 +94,7 @@ const getDashboardStats = async (req, res, next) => {
       }
     ]);
 
-    res.status(200).json({
+    res.json({
       success: true,
       stats: {
         totalEvents,
@@ -123,16 +115,12 @@ const getDashboardStats = async (req, res, next) => {
   }
 };
 
-// @desc    Get all events for admin table
-// @route   GET /api/admin/events
-// @access  Private/Admin
 const getAdminEvents = async (req, res, next) => {
   try {
     const { search, category, status, page = 1, limit = 10 } = req.query;
-
     const query = {};
 
-    if (search && search.trim() !== '') {
+    if (search && search.trim()) {
       query.$or = [
         { title: { $regex: search.trim(), $options: 'i' } },
         { venue: { $regex: search.trim(), $options: 'i' } },
@@ -140,13 +128,8 @@ const getAdminEvents = async (req, res, next) => {
       ];
     }
 
-    if (category && category !== 'All') {
-      query.category = category;
-    }
-
-    if (status && status !== 'All') {
-      query.status = status;
-    }
+    if (category && category !== 'All') query.category = category;
+    if (status && status !== 'All') query.status = status;
 
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
@@ -158,7 +141,7 @@ const getAdminEvents = async (req, res, next) => {
       .skip(skip)
       .limit(limitNum);
 
-    res.status(200).json({
+    res.json({
       success: true,
       total,
       totalPages: Math.ceil(total / limitNum) || 1,
@@ -170,16 +153,12 @@ const getAdminEvents = async (req, res, next) => {
   }
 };
 
-// @desc    Get all registrations with search, filters & optional CSV export
-// @route   GET /api/admin/registrations
-// @access  Private/Admin
 const getAdminRegistrations = async (req, res, next) => {
   try {
     const { search, eventId, status, page = 1, limit = 10, export: exportType } = req.query;
-
     const query = {};
 
-    if (search && search.trim() !== '') {
+    if (search && search.trim()) {
       query.$or = [
         { participantName: { $regex: search.trim(), $options: 'i' } },
         { email: { $regex: search.trim(), $options: 'i' } },
@@ -187,41 +166,36 @@ const getAdminRegistrations = async (req, res, next) => {
       ];
     }
 
-    if (eventId && eventId !== 'All') {
-      query.event = eventId;
-    }
+    if (eventId && eventId !== 'All') query.event = eventId;
+    if (status && status !== 'All') query.registrationStatus = status;
 
-    if (status && status !== 'All') {
-      query.registrationStatus = status;
-    }
-
-    // CSV Export
     if (exportType === 'csv') {
-      const allRegistrations = await Registration.find(query)
+      const records = await Registration.find(query)
         .populate('event', 'title category date venue')
         .populate('user', 'name email')
         .sort({ registeredAt: -1 });
 
-      let csv = 'Registration ID,Participant Name,Email,Phone,Event Title,Category,Event Date,Venue,Status,Registered At\n';
+      let csv = 'ID,Participant,Email,Phone,Event,Category,Date,Venue,Status,Registered At\n';
 
-      allRegistrations.forEach((reg) => {
-        const id = reg._id;
-        const name = `"${(reg.participantName || '').replace(/"/g, '""')}"`;
-        const email = `"${(reg.email || '').replace(/"/g, '""')}"`;
-        const phone = `"${(reg.phone || '').replace(/"/g, '""')}"`;
-        const eventTitle = `"${(reg.event?.title || 'N/A').replace(/"/g, '""')}"`;
-        const category = `"${(reg.event?.category || 'N/A').replace(/"/g, '""')}"`;
-        const eventDate = reg.event?.date ? new Date(reg.event.date).toISOString().split('T')[0] : 'N/A';
-        const venue = `"${(reg.event?.venue || 'N/A').replace(/"/g, '""')}"`;
-        const regStatus = reg.registrationStatus;
-        const regDate = reg.registeredAt ? new Date(reg.registeredAt).toISOString().replace('T', ' ').slice(0, 19) : 'N/A';
-
-        csv += `${id},${name},${email},${phone},${eventTitle},${category},${eventDate},${venue},${regStatus},${regDate}\n`;
+      records.forEach((r) => {
+        const row = [
+          r._id,
+          `"${(r.participantName || '').replace(/"/g, '""')}"`,
+          `"${(r.email || '').replace(/"/g, '""')}"`,
+          `"${(r.phone || '').replace(/"/g, '""')}"`,
+          `"${(r.event?.title || '').replace(/"/g, '""')}"`,
+          `"${(r.event?.category || '').replace(/"/g, '""')}"`,
+          r.event?.date ? new Date(r.event.date).toISOString().split('T')[0] : '',
+          `"${(r.event?.venue || '').replace(/"/g, '""')}"`,
+          r.registrationStatus,
+          r.registeredAt ? new Date(r.registeredAt).toISOString().split('T')[0] : ''
+        ].join(',');
+        csv += row + '\n';
       });
 
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', 'attachment; filename="registrations.csv"');
-      return res.status(200).send(csv);
+      return res.send(csv);
     }
 
     const pageNum = parseInt(page, 10) || 1;
@@ -236,7 +210,7 @@ const getAdminRegistrations = async (req, res, next) => {
       .skip(skip)
       .limit(limitNum);
 
-    res.status(200).json({
+    res.json({
       success: true,
       total,
       totalPages: Math.ceil(total / limitNum) || 1,
@@ -248,16 +222,12 @@ const getAdminRegistrations = async (req, res, next) => {
   }
 };
 
-// @desc    Get all users with registration count
-// @route   GET /api/admin/users
-// @access  Private/Admin
 const getAdminUsers = async (req, res, next) => {
   try {
     const { search, role, page = 1, limit = 10 } = req.query;
-
     const query = {};
 
-    if (search && search.trim() !== '') {
+    if (search && search.trim()) {
       query.$or = [
         { name: { $regex: search.trim(), $options: 'i' } },
         { email: { $regex: search.trim(), $options: 'i' } },
@@ -265,9 +235,7 @@ const getAdminUsers = async (req, res, next) => {
       ];
     }
 
-    if (role && role !== 'All') {
-      query.role = role;
-    }
+    if (role && role !== 'All') query.role = role;
 
     const pageNum = parseInt(page, 10) || 1;
     const limitNum = parseInt(limit, 10) || 10;
@@ -280,18 +248,17 @@ const getAdminUsers = async (req, res, next) => {
       .skip(skip)
       .limit(limitNum);
 
-    // Compute registration count for each user
     const usersWithStats = await Promise.all(
       users.map(async (u) => {
-        const regCount = await Registration.countDocuments({ user: u._id });
+        const count = await Registration.countDocuments({ user: u._id });
         return {
           ...u.toObject(),
-          totalRegistrations: regCount
+          totalRegistrations: count
         };
       })
     );
 
-    res.status(200).json({
+    res.json({
       success: true,
       total,
       totalPages: Math.ceil(total / limitNum) || 1,
@@ -303,9 +270,6 @@ const getAdminUsers = async (req, res, next) => {
   }
 };
 
-// @desc    Update user role
-// @route   PUT /api/admin/users/:id/role
-// @access  Private/Admin
 const updateUserRole = async (req, res, next) => {
   try {
     const { role } = req.body;
@@ -314,7 +278,7 @@ const updateUserRole = async (req, res, next) => {
     if (!role || !['user', 'admin'].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid role. Must be user or admin'
+        message: 'Invalid role'
       });
     }
 
@@ -326,13 +290,13 @@ const updateUserRole = async (req, res, next) => {
       });
     }
 
-    // Safeguard: Cannot demote the last admin
+    // Don't demote the only admin
     if (targetUser.role === 'admin' && role === 'user') {
       const adminCount = await User.countDocuments({ role: 'admin' });
       if (adminCount <= 1) {
         return res.status(400).json({
           success: false,
-          message: 'Operation denied: Cannot remove the last administrator'
+          message: 'Cannot demote the last remaining admin'
         });
       }
     }
@@ -340,9 +304,9 @@ const updateUserRole = async (req, res, next) => {
     targetUser.role = role;
     await targetUser.save();
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: `User role updated to ${role}`,
+      message: `User role changed to ${role}`,
       user: {
         _id: targetUser._id,
         name: targetUser.name,
@@ -356,18 +320,14 @@ const updateUserRole = async (req, res, next) => {
   }
 };
 
-// @desc    Delete user
-// @route   DELETE /api/admin/users/:id
-// @access  Private/Admin
 const deleteUser = async (req, res, next) => {
   try {
     const targetUserId = req.params.id;
 
-    // Safeguard 1: Admin cannot delete themselves
     if (targetUserId === req.user._id.toString()) {
       return res.status(400).json({
         success: false,
-        message: 'Operation denied: You cannot delete your own account'
+        message: 'You cannot delete your own account'
       });
     }
 
@@ -379,45 +339,35 @@ const deleteUser = async (req, res, next) => {
       });
     }
 
-    // Safeguard 2: Admin cannot delete the last admin
     if (targetUser.role === 'admin') {
       const adminCount = await User.countDocuments({ role: 'admin' });
       if (adminCount <= 1) {
         return res.status(400).json({
           success: false,
-          message: 'Operation denied: Cannot delete the last administrator'
+          message: 'Cannot delete the only admin'
         });
       }
     }
 
-    // Delete associated registrations or mark them
     await Registration.deleteMany({ user: targetUserId });
     await User.findByIdAndDelete(targetUserId);
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: 'User and their registrations deleted successfully'
+      message: 'User removed'
     });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Get detailed analytics
-// @route   GET /api/admin/analytics
-// @access  Private/Admin
 const getAdminAnalytics = async (req, res, next) => {
   try {
-    // 1. Monthly Registration Trends (Last 6 months)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
     const monthlyTrends = await Registration.aggregate([
-      {
-        $match: {
-          registeredAt: { $gte: sixMonthsAgo }
-        }
-      },
+      { $match: { registeredAt: { $gte: sixMonthsAgo } } },
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m', date: '$registeredAt' } },
@@ -442,11 +392,8 @@ const getAdminAnalytics = async (req, res, next) => {
       }
     ]);
 
-    // 2. Category Performance (Registrations by category)
     const categoryPerformance = await Registration.aggregate([
-      {
-        $match: { registrationStatus: 'confirmed' }
-      },
+      { $match: { registrationStatus: 'confirmed' } },
       {
         $lookup: {
           from: 'events',
@@ -472,7 +419,6 @@ const getAdminAnalytics = async (req, res, next) => {
       { $sort: { registrations: -1 } }
     ]);
 
-    // 3. Seat occupancy rates of top events
     const eventOccupancy = await Event.aggregate([
       {
         $project: {
@@ -503,7 +449,6 @@ const getAdminAnalytics = async (req, res, next) => {
       { $limit: 8 }
     ]);
 
-    // 4. Overall status breakdown
     const statusBreakdown = await Event.aggregate([
       {
         $group: {
@@ -520,7 +465,7 @@ const getAdminAnalytics = async (req, res, next) => {
       }
     ]);
 
-    res.status(200).json({
+    res.json({
       success: true,
       analytics: {
         monthlyTrends,

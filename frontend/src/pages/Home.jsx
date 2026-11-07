@@ -6,15 +6,13 @@ import {
   Sparkles,
   CheckCircle,
   Calendar,
-  ShieldCheck,
-  TrendingUp,
   Search,
   BellRing
 } from 'lucide-react';
 import api from '../services/api';
 import EventCard from '../components/EventCard';
 import CategoryFilter, { categories } from '../components/CategoryFilter';
-import { LoadingSpinner, EventCardSkeleton } from '../components/LoadingSpinner';
+import { EventCardSkeleton } from '../components/LoadingSpinner';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -31,19 +29,15 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Handle scroll anchor if passed via query
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const scrollTarget = params.get('scroll');
     if (scrollTarget) {
       const el = document.getElementById(`${scrollTarget}-section`);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
   }, [location]);
 
-  // Fetch Featured Events
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
@@ -53,7 +47,7 @@ const Home = () => {
           setFeaturedEvents(res.data.events);
         }
       } catch (err) {
-        console.error('Error fetching featured events:', err);
+        console.error('Failed to load featured events:', err);
       } finally {
         setLoadingFeatured(false);
       }
@@ -61,7 +55,6 @@ const Home = () => {
     fetchFeatured();
   }, []);
 
-  // Fetch Upcoming Events with filtering and sorting
   useEffect(() => {
     const fetchUpcoming = async () => {
       try {
@@ -76,7 +69,7 @@ const Home = () => {
           setTotalPages(res.data.totalPages || 1);
         }
       } catch (err) {
-        console.error('Error fetching upcoming events:', err);
+        console.error('Failed to load upcoming events:', err);
       } finally {
         setLoadingUpcoming(false);
       }
@@ -94,67 +87,64 @@ const Home = () => {
   };
 
   return (
-    <div className="space-y-16 lg:space-y-24 pb-16">
-      {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden bg-slate-950 text-white py-20 lg:py-32 rounded-3xl mx-4 sm:mx-6 lg:mx-8 mt-4 shadow-2xl border border-slate-800">
-        {/* Ambient background decoration */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(99,102,241,0.3),rgba(255,255,255,0))]" />
-        <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -mb-12 -ml-12 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="space-y-16 lg:space-y-20 pb-16">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-slate-950 text-white py-16 lg:py-28 rounded-3xl mx-4 sm:mx-6 lg:mx-8 mt-4 shadow-xl border border-slate-800">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(99,102,241,0.25),transparent)]" />
 
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-8">
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-400/20 text-indigo-300 text-xs sm:text-sm font-semibold backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-6">
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs sm:text-sm font-medium">
             <Sparkles className="w-4 h-4 text-indigo-400" />
-            <span>The Premier Event Discovery & Registration Platform</span>
+            <span>Discover campus events, hackathons & workshops</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.1]">
+          <h1 className="text-4xl sm:text-6xl font-black tracking-tight leading-tight">
             Discover Events. <br />
-            <span className="bg-gradient-to-r from-indigo-400 via-violet-300 to-pink-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
               Create Memories.
             </span>
           </h1>
 
-          <p className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Find exciting events, connect with people, and experience something extraordinary. From high-octane coding hackathons to classical symphonies.
+          <p className="text-sm sm:text-lg text-slate-300 max-w-xl mx-auto leading-relaxed">
+            Find technical hackathons, hands-on development workshops, cultural fests, and sports matches happening around you.
           </p>
 
-          {/* Quick Hero Search Bar */}
+          {/* Search Bar */}
           <form
             onSubmit={handleHeroSearch}
-            className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center p-2 bg-slate-900/90 border border-slate-700/80 rounded-2xl shadow-xl backdrop-blur-md gap-2"
+            className="max-w-xl mx-auto flex flex-col sm:flex-row items-center p-2 bg-slate-900 border border-slate-700 rounded-2xl shadow-lg gap-2"
           >
-            <div className="flex-1 flex items-center px-4 w-full text-slate-400">
-              <Search className="w-5 h-5 mr-3 text-indigo-400 flex-shrink-0" />
+            <div className="flex-1 flex items-center px-3 w-full text-slate-400">
+              <Search className="w-5 h-5 mr-2 text-indigo-400 flex-shrink-0" />
               <input
                 type="text"
                 value={heroSearch}
                 onChange={(e) => setHeroSearch(e.target.value)}
-                placeholder="Search hackathons, workshops, conferences..."
-                className="w-full bg-transparent text-white placeholder-slate-400 text-sm sm:text-base focus:outline-none"
+                placeholder="Search events, topics, or venues..."
+                className="w-full bg-transparent text-white placeholder-slate-400 text-sm focus:outline-none"
               />
             </div>
             <button
               type="submit"
-              className="w-full sm:w-auto px-7 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2 flex-shrink-0"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors flex items-center justify-center space-x-1.5"
             >
               <span>Search</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+          {/* Quick Links */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               to="/events"
-              className="px-6 py-3.5 rounded-xl bg-white text-slate-950 font-bold text-sm hover:bg-slate-100 transition-all shadow-lg flex items-center space-x-2"
+              className="px-5 py-2.5 rounded-xl bg-white text-slate-900 font-bold text-xs sm:text-sm hover:bg-slate-100 transition-colors shadow flex items-center space-x-2"
             >
               <Compass className="w-4 h-4 text-indigo-600" />
               <span>Explore All Events</span>
             </Link>
             <a
               href="#categories-section"
-              className="px-6 py-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold text-sm transition-all"
+              className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs sm:text-sm border border-slate-700 transition-colors"
             >
               Browse Categories
             </a>
@@ -162,23 +152,22 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 2. FEATURED EVENTS */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      {/* Featured Events */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="flex items-center justify-between">
           <div>
-            <div className="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-1">
-              <Sparkles className="w-4 h-4" />
-              <span>Handpicked Highlights</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+              Top Picks
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
               Featured Events
             </h2>
           </div>
           <Link
             to="/events"
-            className="inline-flex items-center space-x-1.5 text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+            className="inline-flex items-center space-x-1 text-xs sm:text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
           >
-            <span>View all featured</span>
+            <span>View all</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -196,23 +185,23 @@ const Home = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8">
-            <p className="text-slate-500 dark:text-slate-400">No featured events currently available.</p>
+          <div className="text-center py-10 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-sm text-slate-500">
+            No featured events at the moment.
           </div>
         )}
       </section>
 
-      {/* 3. CATEGORIES SECTION */}
-      <section id="categories-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
+      {/* Categories */}
+      <section id="categories-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="text-center space-y-1">
           <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            Browse By Interest
+            Categories
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Event Categories
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+            Explore by Category
           </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            Discover tailored experiences designed for your passion and profession.
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+            Find the right activities for your interests.
           </p>
         </div>
 
@@ -225,18 +214,16 @@ const Home = () => {
                 <Link
                   key={cat.name}
                   to={`/events?category=${encodeURIComponent(cat.name)}`}
-                  className="group p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-lg transition-all duration-200 flex flex-col items-center text-center space-y-3"
+                  className="group p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-md transition-all flex flex-col items-center text-center space-y-2"
                 >
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
-                    <Icon className="w-6 h-6" />
+                  <div className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <Icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                    <h3 className="font-semibold text-slate-900 dark:text-white text-sm group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
                       {cat.name}
                     </h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      Explore events
-                    </p>
+                    <p className="text-[11px] text-slate-400">Browse events</p>
                   </div>
                 </Link>
               );
@@ -244,40 +231,36 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 4. UPCOMING EVENTS WITH LIVE FILTERING */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      {/* Upcoming Events */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              Live Database
+              Schedule
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
               Upcoming Events
             </h2>
           </div>
 
-          {/* Sort Selector */}
           <div className="flex items-center space-x-2">
-            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap">
-              Sort by:
-            </label>
+            <span className="text-xs text-slate-500">Sort:</span>
             <select
               value={sortOption}
               onChange={(e) => {
                 setSortOption(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200"
             >
-              <option value="upcoming">Earliest Date</option>
-              <option value="date-desc">Latest Date</option>
-              <option value="seats">Most Seats Available</option>
+              <option value="upcoming">Soonest</option>
+              <option value="date-desc">Latest</option>
+              <option value="seats">Most Seats</option>
               <option value="newest">Recently Added</option>
             </select>
           </div>
         </div>
 
-        {/* Category Pills Bar */}
         <CategoryFilter
           selectedCategory={selectedCategory}
           onSelectCategory={(cat) => {
@@ -286,7 +269,6 @@ const Home = () => {
           }}
         />
 
-        {/* Event Cards Grid */}
         {loadingUpcoming ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
             <EventCardSkeleton />
@@ -301,23 +283,22 @@ const Home = () => {
               ))}
             </div>
 
-            {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center space-x-3 pt-6">
+              <div className="flex items-center justify-center space-x-2 pt-6">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 disabled:opacity-50 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 disabled:opacity-40 text-slate-700 dark:text-slate-300"
                 >
-                  Previous
+                  Prev
                 </button>
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                <span className="text-xs text-slate-500 px-2">
                   Page {currentPage} of {totalPages}
                 </span>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 disabled:opacity-50 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 disabled:opacity-40 text-slate-700 dark:text-slate-300"
                 >
                   Next
                 </button>
@@ -325,108 +306,102 @@ const Home = () => {
             )}
           </>
         ) : (
-          <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 space-y-3">
-            <p className="text-base font-semibold text-slate-700 dark:text-slate-300">
-              No upcoming events found for "{selectedCategory}".
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Try choosing another category or clear the filter.
+          <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-2">
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+              No events found for {selectedCategory}.
             </p>
             <button
               onClick={() => setSelectedCategory('All')}
-              className="px-4 py-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 rounded-xl hover:bg-indigo-100 transition-colors"
+              className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
             >
-              Show All Events
+              Reset filter
             </button>
           </div>
         )}
       </section>
 
-      {/* 5. WHY CHOOSE EVENTHUB? */}
+      {/* Why EventHub Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 lg:p-16 border border-slate-800 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative max-w-3xl mx-auto text-center space-y-3 mb-12">
+        <div className="bg-slate-900 text-white rounded-3xl p-8 sm:p-12 border border-slate-800">
+          <div className="max-w-2xl mx-auto text-center space-y-2 mb-10">
             <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-              Engineered For Seamless Experiences
+              Platform Benefits
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black tracking-tight">
-              Why Choose EventHub?
+            <h2 className="text-2xl sm:text-3xl font-bold">
+              Why use EventHub?
             </h2>
-            <p className="text-sm sm:text-base text-slate-400">
-              From discovering top conferences to effortless instant seat bookings.
+            <p className="text-xs sm:text-sm text-slate-400">
+              A straightforward way for students to discover and register for campus activities.
             </p>
           </div>
 
-          <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
-                <Compass className="w-5 h-5" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                <Compass className="w-4 h-4" />
               </div>
-              <h3 className="font-bold text-white text-base">Discover Amazing Events</h3>
+              <h3 className="font-bold text-sm">Discover Great Events</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Filter by verified categories, dates, and venues with real-time seat availability counts.
+                Filter by category, date, or venue with real-time seat availability.
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-400 flex items-center justify-center">
-                <CheckCircle className="w-5 h-5" />
+            <div className="p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                <CheckCircle className="w-4 h-4" />
               </div>
-              <h3 className="font-bold text-white text-base">Easy Online Registration</h3>
+              <h3 className="font-bold text-sm">One-Click Sign Up</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                One-click registration for logged-in attendees with instant confirmation and seat allocation.
+                Registered users can reserve seats instantly with pre-filled details.
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                <Calendar className="w-5 h-5" />
+            <div className="p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-violet-500/20 text-violet-400 flex items-center justify-center">
+                <Calendar className="w-4 h-4" />
               </div>
-              <h3 className="font-bold text-white text-base">Manage Registrations</h3>
+              <h3 className="font-bold text-sm">Manage Your Passes</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Dedicated attendee dashboard to view tickets, track statuses, or cancel anytime.
+                View your confirmed passes, track dates, or cancel anytime if plans change.
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center">
-                <BellRing className="w-5 h-5" />
+            <div className="p-5 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-2">
+              <div className="w-9 h-9 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center">
+                <BellRing className="w-4 h-4" />
               </div>
-              <h3 className="font-bold text-white text-base">Stay Updated</h3>
+              <h3 className="font-bold text-sm">Live Timers</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Live countdown timers and instant notifications ensure you never miss a registration window.
+                Real-time countdown clocks keep you informed before seats run out.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. CALL TO ACTION BANNER */}
+      {/* CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-800 rounded-3xl p-8 sm:p-12 text-center text-white space-y-6 shadow-2xl relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.15),transparent)]" />
-          <div className="relative max-w-2xl mx-auto space-y-3">
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
-              Ready to Join Your Next Great Event?
+        <div className="bg-indigo-600 rounded-3xl p-8 sm:p-12 text-center text-white space-y-5">
+          <div className="max-w-xl mx-auto space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-bold">
+              Ready to attend your next event?
             </h2>
-            <p className="text-indigo-100 text-sm sm:text-base">
-              Create your account in seconds, explore upcoming hackathons, tech workshops, and cultural festivals.
+            <p className="text-indigo-100 text-xs sm:text-sm">
+              Create an account in seconds and register for upcoming hackathons and workshops.
             </p>
           </div>
-          <div className="relative flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-3">
             <Link
               to="/events"
-              className="px-8 py-3.5 bg-white text-indigo-700 hover:bg-slate-100 font-bold text-sm rounded-xl shadow-lg transition-all"
+              className="px-6 py-2.5 bg-white text-indigo-700 hover:bg-slate-100 font-bold text-xs sm:text-sm rounded-xl transition-colors shadow"
             >
-              Explore Events Now
+              Browse Events
             </Link>
             <Link
               to="/register"
-              className="px-8 py-3.5 bg-indigo-900/60 hover:bg-indigo-900 border border-indigo-400/30 text-white font-bold text-sm rounded-xl transition-all"
+              className="px-6 py-2.5 bg-indigo-800 hover:bg-indigo-900 text-white font-semibold text-xs sm:text-sm rounded-xl transition-colors"
             >
-              Sign Up for Free
+              Create Account
             </Link>
           </div>
         </div>

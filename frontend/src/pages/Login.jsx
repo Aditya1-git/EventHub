@@ -63,14 +63,14 @@ const Login = () => {
             Sign In to Your Account
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Access your event registrations, bookmarks, and personalized dashboard.
+            Log in to register for events and manage your bookings.
           </p>
         </div>
 
-        {/* Demo Fast-Fill Buttons for Evaluation */}
+        {/* Demo Fast-Fill Buttons */}
         <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
           <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">
-            One-Click Demo Credentials
+            Demo Credentials
           </p>
           <div className="grid grid-cols-2 gap-2">
             <button

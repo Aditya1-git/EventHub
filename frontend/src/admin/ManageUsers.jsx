@@ -122,7 +122,7 @@ const ManageUsers = () => {
           Manage Users
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-          View all registered accounts, manage access permissions, and monitor registration volumes.
+          View registered accounts and manage roles.
         </p>
       </div>
 
@@ -159,7 +159,7 @@ const ManageUsers = () => {
       <div className="rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-sm">
         {loading ? (
           <div className="py-20 flex justify-center">
-            <LoadingSpinner size="md" text="Loading users database..." />
+            <LoadingSpinner size="md" text="Loading users..." />
           </div>
         ) : users.length > 0 ? (
           <div className="overflow-x-auto">
@@ -245,7 +245,7 @@ const ManageUsers = () => {
                       {/* Registrations */}
                       <td className="py-3 px-4">
                         <span className="px-2 py-0.5 rounded-lg bg-slate-800 text-white font-bold font-mono">
-                          {u.totalRegistrations || 0} passes
+                          {u.totalRegistrations || 0}
                         </span>
                       </td>
 
@@ -282,7 +282,7 @@ const ManageUsers = () => {
           </div>
         ) : (
           <div className="py-16 text-center text-xs text-slate-400">
-            <p>No users found matching your search filter.</p>
+            <p>No users found matching your search.</p>
           </div>
         )}
 

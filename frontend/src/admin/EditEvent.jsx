@@ -118,7 +118,7 @@ const EditEvent = () => {
   if (loading) {
     return (
       <div className="min-h-[70vh] flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Loading event details..." />
+        <LoadingSpinner size="lg" text="Loading..." />
       </div>
     );
   }
@@ -151,7 +151,7 @@ const EditEvent = () => {
           Edit Event
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-          Modifications will immediately reflect on the public platform.
+          Update the event details below.
         </p>
       </div>
 
